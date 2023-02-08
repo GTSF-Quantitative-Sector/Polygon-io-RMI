@@ -1,5 +1,5 @@
 # Polygon-io-RMI
-Fetch RMI for a stock using Polygon.io API. To use, clone this repository and run 
+Calculate RMI for a stock using Polygon.io API. To use, clone this repository and run 
 ```
 pip install -r requirements.txt
 ```
