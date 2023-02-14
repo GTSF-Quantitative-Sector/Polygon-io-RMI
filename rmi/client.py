@@ -94,11 +94,13 @@ class Client:
             results = await asyncio.gather(*close_coros, return_exceptions=True)
             prices: List[float] = []
             for result in results:
+                if isinstance(result, ValueError):
+                    raise result
                 if not isinstance(result, LookupError):
                     prices.append(result)
 
         prices.reverse()
-        return np.array(prices[-days:], dtype=np.float64)
+        return np.array(prices[-days:])
 
     def _shift(
         self, arr: npt.ArrayLike, num: int, fill_value: Optional[Any] = np.nan
