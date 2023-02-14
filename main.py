@@ -1,5 +1,5 @@
 import rmi
 
-client = rmi.Client("API KEY Here")
+client = rmi.Client("HDPMwANWBOmuqurKYGJwufdUOLkjqRPN")
 print(client.get_rsi("NVDA"))
 print(client.get_rmi("NVDA"))

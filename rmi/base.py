@@ -1,9 +1,10 @@
 import asyncio
+import os
 from datetime import date, timedelta
+from typing import Any, Coroutine, List, Optional
+
 import numpy as np
 import numpy.typing as npt
-from typing import Optional, Any
-import os
 
 from . import gateway
 
@@ -64,7 +65,9 @@ class Client:
 
         return 100 - 100 / (1 + rs)
 
-    async def _get_previous_close_prices(self, ticker: str, days: int) -> np.ndarray:
+    async def _get_previous_close_prices(
+        self, ticker: str, days: int
+    ) -> npt.NDArray[np.float64]:
         """Get close prices from previous days
 
         Args:
@@ -78,23 +81,23 @@ class Client:
         curr_date = date.today()
 
         async with gateway.Connection(self.api_key) as conn:
-            close_coros = []
+            close_coros: List[Coroutine[Any, Any, float]] = []
             for _ in range(days_to_lookback):
                 close_coros.append(conn.get_close(ticker, curr_date))
                 curr_date -= timedelta(days=1)
 
             results = await asyncio.gather(*close_coros, return_exceptions=True)
-            prices = []
+            prices: List[float] = []
             for result in results:
                 if not isinstance(result, LookupError):
                     prices.append(result)
 
         prices.reverse()
-        return np.array(prices[-days:])
+        return np.array(prices[-days:], dtype=np.float64)
 
     def _shift(
         self, arr: npt.ArrayLike, num: int, fill_value: Optional[Any] = np.nan
-    ) -> np.ndarray:
+    ) -> npt.NDArray[Any]:
         """Shift numpy array elements forwards or backwards
 
         Args:

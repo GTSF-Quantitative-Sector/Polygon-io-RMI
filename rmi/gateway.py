@@ -1,7 +1,8 @@
-import aiohttp
 import asyncio
 from datetime import date
-from typing import Optional
+from typing import Any, Optional, Tuple
+
+import aiohttp
 
 
 class Connection:
@@ -55,6 +56,7 @@ class Connection:
         self.active = True
         return self
 
-    async def __aexit__(self, *args):
+    async def __aexit__(self, *args: Tuple[Any]):
+        assert self.session is not None
         await self.session.close()
         self.active = False
