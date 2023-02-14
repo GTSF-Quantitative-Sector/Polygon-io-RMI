@@ -1,3 +1,5 @@
+""" Async gateway to connect to Polygon.io """
+
 import asyncio
 from datetime import date
 from typing import Any, Optional, Tuple
@@ -6,6 +8,9 @@ import aiohttp
 
 
 class Connection:
+
+    """Connection object to Polygon.io. Initialized with async context manager"""
+
     session: Optional[aiohttp.ClientSession]
 
     def __init__(self, api_key: str, timeout: Optional[float] = 10):
@@ -19,6 +24,7 @@ class Connection:
         self.api_key = api_key
         self.timeout = timeout
         self.session = None
+        self.active = False
 
     async def get_close(self, ticker: str, query_date: date) -> float:
         """Get close price for a ticker on a specific query date
@@ -43,7 +49,7 @@ class Connection:
         except asyncio.TimeoutError:
             raise TimeoutError(
                 f"Timed out while retreiving price for {ticker} on {date_string}"
-            )
+            ) from None
 
         if response["status"] == "NOT_FOUND":
             raise LookupError(

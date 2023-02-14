@@ -1,3 +1,5 @@
+""" Main client code """
+
 import asyncio
 import os
 from datetime import date, timedelta
@@ -10,6 +12,9 @@ from . import gateway
 
 
 class Client:
+
+    """RMI Client class. Calculates RMI and RSI from Polygon.io"""
+
     def __init__(self, api_key: str) -> None:
         self.api_key = api_key
 
