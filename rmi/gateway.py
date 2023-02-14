@@ -55,8 +55,10 @@ class Connection:
             raise LookupError(
                 f"could not find close price for {ticker} on {query_date}"
             )
-        elif response["status"] == "ERROR":
+
+        if response["status"] == "ERROR":
             raise ValueError(response["error"])
+
         return response["close"]
 
     async def __aenter__(self):
