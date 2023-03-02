@@ -85,19 +85,21 @@ class Client:
         days_to_lookback = int(days * 1.5)
         curr_date = date.today()
 
-        async with gateway.Connection(self.api_key) as conn:
-            close_coros: List[Coroutine[Any, Any, float]] = []
-            for _ in range(days_to_lookback):
-                close_coros.append(conn.get_close(ticker, curr_date))
-                curr_date -= timedelta(days=1)
+        sem = asyncio.Semaphore(10)
+        async with sem:
+            async with gateway.Connection(self.api_key) as conn:
+                close_coros: List[Coroutine[Any, Any, float]] = []
+                for _ in range(days_to_lookback):
+                    close_coros.append(conn.get_close(ticker, curr_date))
+                    curr_date -= timedelta(days=1)
 
-            results = await asyncio.gather(*close_coros, return_exceptions=True)
-            prices: List[float] = []
-            for result in results:
-                if isinstance(result, ValueError):
-                    raise result
-                if not isinstance(result, LookupError):
-                    prices.append(result)
+                results = await asyncio.gather(*close_coros, return_exceptions=True)
+                prices: List[float] = []
+                for result in results:
+                    if isinstance(result, ValueError):
+                        raise result
+                    if not isinstance(result, LookupError):
+                        prices.append(result)
 
         prices.reverse()
         return np.array(prices[-days:])
