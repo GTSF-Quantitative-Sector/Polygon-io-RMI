@@ -3,7 +3,7 @@
 import asyncio
 import os
 from datetime import date, timedelta
-from typing import Any, Coroutine, List, Optional
+from typing import Any, List, Optional
 
 import numpy as np
 import numpy.typing as npt
@@ -86,12 +86,14 @@ class Client:
         curr_date = date.today()
 
         async with gateway.Connection(self.api_key) as conn:
-            close_coros: List[Coroutine[Any, Any, float]] = []
+            close_tasks: List[asyncio.Task[float]] = []
             for _ in range(days_to_lookback):
-                close_coros.append(conn.get_close(ticker, curr_date))
+                close_tasks.append(
+                    asyncio.create_task(conn.get_close(ticker, curr_date))
+                )
                 curr_date -= timedelta(days=1)
 
-            results = await asyncio.gather(*close_coros, return_exceptions=True)
+            results = await asyncio.gather(*close_tasks, return_exceptions=True)
             prices: List[float] = []
             for result in results:
                 if isinstance(result, ValueError):
