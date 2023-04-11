@@ -21,23 +21,25 @@ class Client:
         if os.name == "nt":
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-    def get_rsi(self, ticker: str, period: int = 14) -> float:
+    def get_rsi(self, ticker: str, query_date: str = None, period: int = 14) -> float:
         """Get current Relative Strength Index for a specified ticker
 
         Args:
             ticker (str): ticker for which to calculate RSI
+            query_date (Optional[str]): date to start looking back from in YYYY-MM-DD format. Defaults to None, which uses today's date.
             period (Optional[int]): RSI calculation lookback period. Defaults to 14
         Returns:
             float: calculated RSI
 
         """
-        return self.get_rmi(ticker, period, 1)
+        return self.get_rmi(ticker, query_date, period, 1)
 
-    def get_rmi(self, ticker: str, period: int = 20, momentum: int = 5) -> float:
+    def get_rmi(self, ticker: str, query_date: str = None, period: int = 20, momentum: int = 5) -> float:
         """Get current Relative Momentum Index for a specified ticker
 
         Args:
             ticker (str): ticker for which to calculate RMI
+            query_date (Optional[str]): date to start looking back from in YYYY-MM-DD format. Defaults to None, which uses today's date.
             period (Optional[int]): RMI calculation lookback period. Defaults to 20
             momentum (Optional[int]): Stock chart bar lookback period. Defaults to 5
         Returns:
@@ -46,7 +48,7 @@ class Client:
         """
 
         previous_close_prices = asyncio.run(
-            self._get_previous_close_prices(ticker, period + 1)
+            self._get_previous_close_prices(ticker, period + 1, query_date)
         )
 
         # subtract difference of momentum days
@@ -71,19 +73,20 @@ class Client:
         return 100 - 100 / (1 + rs)
 
     async def _get_previous_close_prices(
-        self, ticker: str, days: int
+        self, ticker: str, days: int, query_date: str = None
     ) -> npt.NDArray[np.float64]:
         """Get close prices from previous days
 
         Args:
             ticker (str): Ticker to retreive close prices for
             days (int): number of previous close prices to retreive
+            query_date (Optional[str]): date to start looking back from in YYYY-MM-DD format. Defaults to None, which uses today's date.
 
         Returns:
             np.ndarray: numpy array with close prices
         """
         days_to_lookback = int(days * 1.5)
-        curr_date = date.today()
+        curr_date = date.today() if query_date is None else date.fromisoformat(query_date)
 
         async with gateway.Connection(self.api_key) as conn:
             close_tasks: List[asyncio.Task[float]] = []
