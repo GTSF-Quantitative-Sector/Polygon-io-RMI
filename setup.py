@@ -1,6 +1,6 @@
 from setuptools import setup
 
-VERSION = "1.1"
+VERSION = "1.2"
 DESCRIPTION = "Fetch RSI and RMI for a stock using Polygon.io API."
 
 setup(

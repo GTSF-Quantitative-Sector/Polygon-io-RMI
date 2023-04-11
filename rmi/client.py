@@ -21,7 +21,7 @@ class Client:
         if os.name == "nt":
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-    def get_rsi(self, ticker: str, query_date: str = None, period: int = 14) -> float:
+    async def get_rsi(self, ticker: str, query_date: str = None, period: int = 14) -> float:
         """Get current Relative Strength Index for a specified ticker
 
         Args:
@@ -32,9 +32,9 @@ class Client:
             float: calculated RSI
 
         """
-        return self.get_rmi(ticker, query_date, period, 1)
+        return await self.get_rmi(ticker, query_date, period, 1)
 
-    def get_rmi(self, ticker: str, query_date: str = None, period: int = 20, momentum: int = 5) -> float:
+    async def get_rmi(self, ticker: str, query_date: str = None, period: int = 20, momentum: int = 5) -> float:
         """Get current Relative Momentum Index for a specified ticker
 
         Args:
@@ -47,9 +47,7 @@ class Client:
 
         """
 
-        previous_close_prices = asyncio.run(
-            self._get_previous_close_prices(ticker, period + 1, query_date)
-        )
+        previous_close_prices = await self._get_previous_close_prices(ticker, period + 1, query_date)
 
         # subtract difference of momentum days
         momentum_changes = (
